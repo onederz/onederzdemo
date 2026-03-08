@@ -4249,19 +4249,30 @@ body:has(.popup[style*="block"]) {
     left: 0;
     width: 100%;
     height: 100%;
-    background: white;
     z-index: 999999;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    background: white;
 }
 
 #page-preloader.hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+}
+
+@media (max-width: 480px) {
+
+    .preloader-logo {
+        scale: 0.6;
+    }
+
+    .preloader-text{
+        scale: 0.6;
+    }
 }
 
 /* Logo Animation */

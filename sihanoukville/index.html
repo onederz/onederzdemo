@@ -1541,31 +1541,89 @@ document.querySelectorAll('.nav-menu a').forEach(link => {
         }
 
         function filterRoomCards(roomType) {
-            const roomCards = document.querySelectorAll('.room-card');
-            roomCards.forEach(card => {
-                const cardType = card.getAttribute('data-room-type');
-                if (roomType === 'all' || cardType === roomType) {
-                    card.style.display = 'flex';
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    card.style.transitionDelay = '0s';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            currentIndex = 0;
-
-            setTimeout(() => {
-                setupCarousel();
-                animateCardsIn();
-                fadeInCarousel();
-                reinitializeRoomSliders();
-                reinitializeSwipeEvents();
-                goToSlide(0, true);
-                updateNavButtonsVisibility();
-            }, 50);
+    const roomCards = document.querySelectorAll('.room-card');
+    roomCards.forEach(card => {
+        const cardType = card.getAttribute('data-room-type');
+        if (roomType === 'all' || cardType === roomType) {
+            card.style.display = 'flex';
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transitionDelay = '0s';
+        } else {
+            card.style.display = 'none';
         }
+    });
+
+    currentIndex = 0;
+
+    // Hide navigation buttons immediately during filter transition
+    prevBtn.style.transition = 'opacity 0.2s ease';
+    nextBtn.style.transition = 'opacity 0.2s ease';
+    swipeInstruction.style.transition = 'opacity 0.2s ease';
+    prevBtn.style.opacity = '0';
+    nextBtn.style.opacity = '0';
+    swipeInstruction.style.opacity = '0';
+    
+    // Actually hide them after a brief delay
+    setTimeout(() => {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        swipeInstruction.style.display = 'none';
+    }, 200);
+
+    setTimeout(() => {
+        setupCarousel();
+        animateCardsIn();
+        fadeInCarousel();
+        reinitializeRoomSliders();
+        reinitializeSwipeEvents();
+        goToSlide(0, true);
+        
+        // Show navigation buttons only if needed, after cards are visible
+        setTimeout(() => {
+            const visibleCards = document.querySelectorAll('.room-card[style*="display: flex"], .room-card:not([style*="display: none"])');
+            const totalVisibleCards = visibleCards.length;
+            
+            if (totalVisibleCards > 0) {
+                const needsNavigation = (totalVisibleCards * slideWidth) > carouselWidth || window.innerWidth <= 768;
+                
+                if (needsNavigation) {
+                    // Show buttons with fade in
+                    prevBtn.style.display = 'flex';
+                    nextBtn.style.display = 'flex';
+                    swipeInstruction.style.display = 'block';
+                    
+                    // Force a reflow
+                    void prevBtn.offsetHeight;
+                    
+                    prevBtn.style.transition = 'opacity 0.4s ease';
+                    nextBtn.style.transition = 'opacity 0.4s ease';
+                    swipeInstruction.style.transition = 'opacity 0.4s ease';
+                    
+                    // Set opacity based on current index
+                    if (currentIndex === 0) {
+                        prevBtn.style.opacity = '0';
+                        nextBtn.style.opacity = '1';
+                    } else {
+                        const maxIndex = window.innerWidth <= 768 ? 
+                            Math.max(0, totalVisibleCards - 1) : 
+                            Math.max(0, totalVisibleCards - cardsPerView);
+                        
+                        if (currentIndex >= maxIndex) {
+                            prevBtn.style.opacity = '1';
+                            nextBtn.style.opacity = '0';
+                        } else {
+                            prevBtn.style.opacity = '1';
+                            nextBtn.style.opacity = '1';
+                        }
+                    }
+                    
+                    swipeInstruction.style.opacity = '1';
+                }
+            }
+        }, 600); // Wait for cards to finish animating in
+    }, 50);
+}
 
         function animateCardsIn() {
             const visibleCards = Array.from(document.querySelectorAll('.room-card')).filter(card => card.style.display !== 'none');
@@ -1611,23 +1669,40 @@ document.querySelectorAll('.nav-menu a').forEach(link => {
         }
 
         function showAllNavigation() {
+    prevBtn.style.opacity = '0';
+    nextBtn.style.opacity = '0';
+    swipeInstruction.style.opacity = '0';
+    
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    swipeInstruction.style.display = 'block';
+    
+    setTimeout(() => {
+        prevBtn.style.transition = 'opacity 0.4s ease 0.2s';
+        nextBtn.style.transition = 'opacity 0.4s ease 0.2s';
+        swipeInstruction.style.transition = 'opacity 0.4s ease 0.3s';
+        
+        // Set initial opacities based on current index
+        if (currentIndex === 0) {
             prevBtn.style.opacity = '0';
-            nextBtn.style.opacity = '0';
-            swipeInstruction.style.opacity = '0';
+            nextBtn.style.opacity = '1';
+        } else {
+            let maxIndex = window.innerWidth <= 768 ? 
+                Math.max(0, totalCards - 1) : 
+                Math.max(0, totalCards - cardsPerView);
             
-            prevBtn.style.display = 'flex';
-            nextBtn.style.display = 'flex';
-            swipeInstruction.style.display = 'block';
-            
-            setTimeout(() => {
-                prevBtn.style.transition = 'opacity 0.4s ease 0.2s';
-                nextBtn.style.transition = 'opacity 0.4s ease 0.2s';
-                swipeInstruction.style.transition = 'opacity 0.4s ease 0.3s';
+            if (currentIndex >= maxIndex) {
+                prevBtn.style.opacity = '1';
+                nextBtn.style.opacity = '0';
+            } else {
                 prevBtn.style.opacity = '1';
                 nextBtn.style.opacity = '1';
-                swipeInstruction.style.opacity = '1';
-            }, 150);
+            }
         }
+        
+        swipeInstruction.style.opacity = '1';
+    }, 150);
+}
 
         function hideAllNavigation() {
             prevBtn.style.transition = 'opacity 0.3s ease';
@@ -2250,45 +2325,45 @@ document.querySelectorAll('.nav-menu a').forEach(link => {
         }
 
         function updateNavButtonsVisibility() {
-            if (totalCards === 0) {
-                hideAllNavigation();
-                return;
-            }
-            
-            let maxIndex = window.innerWidth <= 768 ? 
-                Math.max(0, totalCards - 1) : 
-                Math.max(0, totalCards - cardsPerView);
-            
-            const isAtLastPage = currentIndex >= maxIndex;
-            
-            if (isAtLastPage) {
-                nextBtn.style.opacity = '0';
-                setTimeout(() => {
-                    nextBtn.style.display = 'none';
-                }, 300);
-                
-                if (currentIndex > 0) {
-                    prevBtn.style.display = 'flex';
-                    setTimeout(() => {
-                        prevBtn.style.opacity = '1';
-                    }, 50);
-                }
-            } else {
-                prevBtn.style.display = 'flex';
-                nextBtn.style.display = 'flex';
-                setTimeout(() => {
-                    prevBtn.style.opacity = '1';
-                    nextBtn.style.opacity = '1';
-                }, 50);
-            }
-            
-            if (currentIndex === 0) {
-                prevBtn.style.opacity = '0';
-                setTimeout(() => {
-                    prevBtn.style.display = 'none';
-                }, 300);
-            }
-        }
+    if (totalCards === 0) {
+        hideAllNavigation();
+        return;
+    }
+    
+    let maxIndex = window.innerWidth <= 768 ? 
+        Math.max(0, totalCards - 1) : 
+        Math.max(0, totalCards - cardsPerView);
+    
+    const isAtLastPage = currentIndex >= maxIndex;
+    const isAtFirstPage = currentIndex === 0;
+    
+    // Check if navigation is needed at all
+    const totalContentWidth = totalCards * slideWidth;
+    const needsNavigation = totalContentWidth > carouselWidth || window.innerWidth <= 768;
+    
+    if (!needsNavigation) {
+        hideAllNavigation();
+        return;
+    }
+    
+    // Ensure buttons are displayed
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    swipeInstruction.style.display = 'block';
+    
+    // Force a reflow
+    void prevBtn.offsetHeight;
+    
+    // Set transitions
+    prevBtn.style.transition = 'opacity 0.3s ease';
+    nextBtn.style.transition = 'opacity 0.3s ease';
+    swipeInstruction.style.transition = 'opacity 0.3s ease';
+    
+    // Set opacities based on position
+    prevBtn.style.opacity = isAtFirstPage ? '0' : '1';
+    nextBtn.style.opacity = isAtLastPage ? '0' : '1';
+    swipeInstruction.style.opacity = '1';
+}
 
         window.currentCarouselIndex = 0;
 
@@ -2649,9 +2724,6 @@ function setupEventListeners() {
         if (e.target === sectionPopup) closeModals();
     });
     
-    imageModal.addEventListener('click', (e) => {
-        if (e.target === imageModal) closeModals();
-    });
     
     // Navigation buttons
     navPrev.addEventListener('click', showPrevImage);

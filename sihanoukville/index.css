@@ -3134,9 +3134,11 @@ body.page-ready .container-booking {
     height: 100%;
     background: rgba(30, 43, 58, 0.8);
     z-index: 1000;
-    overflow-y: auto;
+    overflow: hidden;
     overscroll-behavior: contain;
 }
+
+
 
 .popup:target,
 .popup[style*="block"] {
@@ -3152,30 +3154,35 @@ body:has(.popup[style*="block"]) {
 .popup-content {
     background-color: white;
     max-width: 1200px;
-    width: 90%;
-    height: 90%;
+    width: 95%;
+    height: 90vh;
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    position: absolute;
     border-radius: 25px;
     overflow: hidden;
     box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
 }
 
 .popup-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px;
-    color: var(--primary);
-    border-radius: 50px;
+    padding: 15px 25px;
+    background: white;
+    border-bottom: 1px solid var(--neutral);
+    flex-shrink: 0;
 }
 
 .popup-title {
-    padding-left: 20px;
+    padding-left: 10px;
     font-size: 1.8rem;
     font-weight: 600;
+    color: var(--primary);
+    margin: 0;
 }
 
 .close-btn {
@@ -3234,14 +3241,33 @@ body:has(.popup[style*="block"]) {
 
 .section-gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     grid-gap: 20px;
-    padding: 30px;
-    height: 75svh;
-    overflow-y: auto;
+    padding: 25px;
+    overflow-y: auto !important; 
+    height: calc(90vh - 140px) !important;
+    flex: 1;
     scrollbar-width: thin;
+    scrollbar-color: var(--secondary) var(--neutral);
+}
+.section-gallery::-webkit-scrollbar {
+    width: 8px;
+    display: block !important;
 }
 
+.section-gallery::-webkit-scrollbar-track {
+    background: var(--neutral);
+    border-radius: 4px;
+}
+
+.section-gallery::-webkit-scrollbar-thumb {
+    background: var(--secondary);
+    border-radius: 4px;
+}
+
+.section-gallery::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
 .section-item {
     position: relative;
     width: 100%;
@@ -4223,19 +4249,30 @@ body:has(.popup[style*="block"]) {
     left: 0;
     width: 100%;
     height: 100%;
-    background: white;
     z-index: 999999;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    background: white;
 }
 
 #page-preloader.hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+}
+
+@media (max-width: 480px) {
+
+    .preloader-logo {
+        scale: 0.6;
+    }
+
+    .preloader-text{
+        scale: 0.6;
+    }
 }
 
 /* Logo Animation */
